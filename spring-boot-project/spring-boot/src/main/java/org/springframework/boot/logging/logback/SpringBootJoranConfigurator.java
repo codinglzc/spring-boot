@@ -40,6 +40,7 @@ class SpringBootJoranConfigurator extends JoranConfigurator {
 
 	@Override
 	public void addInstanceRules(RuleStore rs) {
+		// 调用父方法
 		super.addInstanceRules(rs);
 		Environment environment = this.initializationContext.getEnvironment();
 		rs.addRule(new ElementSelector("configuration/springProperty"), new SpringPropertyAction(environment));

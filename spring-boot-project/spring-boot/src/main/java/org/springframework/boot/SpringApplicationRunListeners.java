@@ -35,6 +35,9 @@ class SpringApplicationRunListeners {
 
 	private final Log log;
 
+	/**
+	 * SpringApplicationRunListener 数组
+	 */
 	private final List<SpringApplicationRunListener> listeners;
 
 	SpringApplicationRunListeners(Log log, Collection<? extends SpringApplicationRunListener> listeners) {

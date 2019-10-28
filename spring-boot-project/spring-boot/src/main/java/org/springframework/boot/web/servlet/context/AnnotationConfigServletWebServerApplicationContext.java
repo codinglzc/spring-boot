@@ -59,8 +59,14 @@ public class AnnotationConfigServletWebServerApplicationContext extends ServletW
 
 	private final ClassPathBeanDefinitionScanner scanner;
 
+	/**
+	 * 需要被 {@link #reader} 读取的注册类们
+	 */
 	private final Set<Class<?>> annotatedClasses = new LinkedHashSet<>();
 
+	/**
+	 * 需要被 {@link #scanner} 扫描的包
+	 */
 	private String[] basePackages;
 
 	/**
@@ -94,7 +100,9 @@ public class AnnotationConfigServletWebServerApplicationContext extends ServletW
 	 */
 	public AnnotationConfigServletWebServerApplicationContext(Class<?>... annotatedClasses) {
 		this();
+		// <1> 注册指定的注解的类们
 		register(annotatedClasses);
+		// 初始化 Spring 容器
 		refresh();
 	}
 
@@ -106,7 +114,9 @@ public class AnnotationConfigServletWebServerApplicationContext extends ServletW
 	 */
 	public AnnotationConfigServletWebServerApplicationContext(String... basePackages) {
 		this();
+		// <2> 扫描指定包
 		scan(basePackages);
+		// 初始化 Spring 容器
 		refresh();
 	}
 
@@ -170,7 +180,7 @@ public class AnnotationConfigServletWebServerApplicationContext extends ServletW
 	 * @see #scan(String...)
 	 * @see #refresh()
 	 */
-	@Override
+	@Override // 实现自 AnnotationConfigRegistry 接口
 	public final void register(Class<?>... annotatedClasses) {
 		Assert.notEmpty(annotatedClasses, "At least one annotated class must be specified");
 		this.annotatedClasses.addAll(Arrays.asList(annotatedClasses));
@@ -189,18 +199,23 @@ public class AnnotationConfigServletWebServerApplicationContext extends ServletW
 		this.basePackages = basePackages;
 	}
 
-	@Override
+	@Override // 实现自 AbstractApplicationContext 抽象类
 	protected void prepareRefresh() {
+		// 清空 scanner 的缓存
 		this.scanner.clearCache();
+		// 调用父类
 		super.prepareRefresh();
 	}
 
 	@Override
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+		// 调用父类
 		super.postProcessBeanFactory(beanFactory);
+		// 扫描指定的包
 		if (this.basePackages != null && this.basePackages.length > 0) {
 			this.scanner.scan(this.basePackages);
 		}
+		// 注册指定的注解的类们定的
 		if (!this.annotatedClasses.isEmpty()) {
 			this.reader.register(ClassUtils.toClassArray(this.annotatedClasses));
 		}

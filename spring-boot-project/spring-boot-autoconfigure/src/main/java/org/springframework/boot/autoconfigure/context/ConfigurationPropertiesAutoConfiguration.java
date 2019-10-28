@@ -32,7 +32,7 @@ import org.springframework.context.annotation.Configuration;
  * @see ConfigurationProperties
  */
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties
+@EnableConfigurationProperties // <X>
 public class ConfigurationPropertiesAutoConfiguration {
 
 }

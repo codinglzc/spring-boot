@@ -111,9 +111,11 @@ public class LoggingSystemProperties {
 	}
 
 	public void apply(LogFile logFile) {
+		// <1> 获得 PropertyResolver 对象
 		PropertyResolver resolver = getPropertyResolver();
+		// <2> 解析配置文件到系统属性中
 		setSystemProperty(resolver, EXCEPTION_CONVERSION_WORD, "exception-conversion-word");
-		setSystemProperty(PID_KEY, new ApplicationPid().toString());
+		setSystemProperty(PID_KEY, new ApplicationPid().toString()); // 应用进程编号
 		setSystemProperty(resolver, CONSOLE_LOG_PATTERN, "pattern.console");
 		setSystemProperty(resolver, FILE_LOG_PATTERN, "pattern.file");
 		setSystemProperty(resolver, FILE_CLEAN_HISTORY_ON_START, "file.clean-history-on-start");
@@ -122,6 +124,7 @@ public class LoggingSystemProperties {
 		setSystemProperty(resolver, FILE_TOTAL_SIZE_CAP, "file.total-size-cap");
 		setSystemProperty(resolver, LOG_LEVEL_PATTERN, "pattern.level");
 		setSystemProperty(resolver, LOG_DATEFORMAT_PATTERN, "pattern.dateformat");
+		// <3> 如果 logFile 非空，则应用配置
 		if (logFile != null) {
 			logFile.applyToSystemProperties();
 		}
@@ -138,7 +141,7 @@ public class LoggingSystemProperties {
 	}
 
 	private void setSystemProperty(PropertyResolver resolver, String systemPropertyName, String propertyName) {
-		setSystemProperty(systemPropertyName, resolver.getProperty("logging." + propertyName));
+		setSystemProperty(systemPropertyName, resolver.getProperty("logging." + propertyName)); // <X>
 	}
 
 	private void setSystemProperty(String name, String value) {

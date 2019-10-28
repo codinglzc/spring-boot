@@ -50,12 +50,12 @@ public class GenericReactiveWebApplicationContext extends GenericApplicationCont
 		super(beanFactory);
 	}
 
-	@Override
+	@Override // 覆写 AbstractApplicationContext 方法
 	protected ConfigurableEnvironment createEnvironment() {
 		return new StandardReactiveWebEnvironment();
 	}
 
-	@Override
+	@Override // 覆写 AbstractApplicationContext 方法
 	protected Resource getResourceByPath(String path) {
 		// We must be careful not to expose classpath resources
 		return new FilteredReactiveWebContextResource(path);

@@ -63,6 +63,9 @@ class DefaultLogbackConfiguration {
 
 	private static final Integer MAX_FILE_HISTORY = 7;
 
+	/**
+	 * PropertyResolver 对象。提供从 environment 解析配置
+	 */
 	private final PropertyResolver patterns;
 
 	private final LogFile logFile;
@@ -73,36 +76,47 @@ class DefaultLogbackConfiguration {
 	}
 
 	private PropertyResolver getPatternsResolver(Environment environment) {
+		// 创建 PropertySourcesPropertyResolver 对象，无 environment
 		if (environment == null) {
 			return new PropertySourcesPropertyResolver(null);
 		}
+		// 创建 PropertySourcesPropertyResolver 对象，有 environment
 		if (environment instanceof ConfigurableEnvironment) {
 			PropertySourcesPropertyResolver resolver = new PropertySourcesPropertyResolver(
 					((ConfigurableEnvironment) environment).getPropertySources());
 			resolver.setIgnoreUnresolvableNestedPlaceholders(true);
 			return resolver;
 		}
+		// 直接返回 environment
 		return environment;
 	}
 
 	public void apply(LogbackConfigurator config) {
+		// <1> 锁
 		synchronized (config.getConfigurationLock()) {
+			// <2> 设置基础属性
 			base(config);
+			// <3> 创建 console Appender
 			Appender<ILoggingEvent> consoleAppender = consoleAppender(config);
+			// <4> 如果 logFile 非空，则创建 file Appender
 			if (this.logFile != null) {
 				Appender<ILoggingEvent> fileAppender = fileAppender(config, this.logFile.toString());
+				// <5> 设置 appender 到 ROOT Logger
 				config.root(Level.INFO, consoleAppender, fileAppender);
 			}
 			else {
+				// <5> 设置 appender 到 ROOT Logger
 				config.root(Level.INFO, consoleAppender);
 			}
 		}
 	}
 
 	private void base(LogbackConfigurator config) {
+		// <2.1> Converter
 		config.conversionRule("clr", ColorConverter.class);
 		config.conversionRule("wex", WhitespaceThrowableProxyConverter.class);
 		config.conversionRule("wEx", ExtendedWhitespaceThrowableProxyConverter.class);
+		// <2.2> 默认的 logger
 		config.logger("org.apache.catalina.startup.DigesterFactory", Level.ERROR);
 		config.logger("org.apache.catalina.util.LifecycleBase", Level.ERROR);
 		config.logger("org.apache.coyote.http11.Http11NioProtocol", Level.WARN);
@@ -115,11 +129,11 @@ class DefaultLogbackConfiguration {
 	private Appender<ILoggingEvent> consoleAppender(LogbackConfigurator config) {
 		ConsoleAppender<ILoggingEvent> appender = new ConsoleAppender<>();
 		PatternLayoutEncoder encoder = new PatternLayoutEncoder();
-		String logPattern = this.patterns.getProperty("logging.pattern.console", CONSOLE_LOG_PATTERN);
+		String logPattern = this.patterns.getProperty("logging.pattern.console", CONSOLE_LOG_PATTERN); // <X>
 		encoder.setPattern(OptionHelper.substVars(logPattern, config.getContext()));
 		config.start(encoder);
 		appender.setEncoder(encoder);
-		config.appender("CONSOLE", appender);
+		config.appender("CONSOLE", appender); // <Y>
 		return appender;
 	}
 
@@ -131,6 +145,7 @@ class DefaultLogbackConfiguration {
 		appender.setEncoder(encoder);
 		config.start(encoder);
 		appender.setFile(logFile);
+		// 滚动策略
 		setRollingPolicy(appender, config, logFile);
 		config.appender("FILE", appender);
 		return appender;
@@ -142,6 +157,7 @@ class DefaultLogbackConfiguration {
 		rollingPolicy.setCleanHistoryOnStart(
 				this.patterns.getProperty("logging.file.clean-history-on-start", Boolean.class, false));
 		rollingPolicy.setFileNamePattern(logFile + ".%d{yyyy-MM-dd}.%i.gz");
+		// 单文件最大值
 		setMaxFileSize(rollingPolicy, getDataSize("logging.file.max-size", MAX_FILE_SIZE));
 		rollingPolicy
 				.setMaxHistory(this.patterns.getProperty("logging.file.max-history", Integer.class, MAX_FILE_HISTORY));

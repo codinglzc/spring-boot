@@ -58,17 +58,22 @@ class LogbackConfigurator {
 	public void conversionRule(String conversionWord, Class<? extends Converter> converterClass) {
 		Assert.hasLength(conversionWord, "Conversion word must not be empty");
 		Assert.notNull(converterClass, "Converter class must not be null");
+		// 获得注册表
 		Map<String, String> registry = (Map<String, String>) this.context
 				.getObject(CoreConstants.PATTERN_RULE_REGISTRY);
+		// 如果注册表为空，则进行注册
 		if (registry == null) {
 			registry = new HashMap<>();
 			this.context.putObject(CoreConstants.PATTERN_RULE_REGISTRY, registry);
 		}
+		// 添加转换规则，到注册表中
 		registry.put(conversionWord, converterClass.getName());
 	}
 
 	public void appender(String name, Appender<?> appender) {
+		// 设置 name
 		appender.setName(name);
+		// 启动 Appender
 		start(appender);
 	}
 
@@ -81,11 +86,15 @@ class LogbackConfigurator {
 	}
 
 	public void logger(String name, Level level, boolean additive, Appender<ILoggingEvent> appender) {
+		// 获得 Logger 对象
 		Logger logger = this.context.getLogger(name);
+		// 设置 level
 		if (level != null) {
 			logger.setLevel(level);
 		}
+		// 设置 additive
 		logger.setAdditive(additive);
+		// 设置 appender
 		if (appender != null) {
 			logger.addAppender(appender);
 		}
@@ -93,19 +102,24 @@ class LogbackConfigurator {
 
 	@SafeVarargs
 	public final void root(Level level, Appender<ILoggingEvent>... appenders) {
+		// 获得 Root Logger 对象
 		Logger logger = this.context.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+		// 设置 level
 		if (level != null) {
 			logger.setLevel(level);
 		}
+		// 添加 appender 到 logger 中
 		for (Appender<ILoggingEvent> appender : appenders) {
 			logger.addAppender(appender);
 		}
 	}
 
 	public void start(LifeCycle lifeCycle) {
+		// 设置 context
 		if (lifeCycle instanceof ContextAware) {
 			((ContextAware) lifeCycle).setContext(this.context);
 		}
+		// 启动
 		lifeCycle.start();
 	}
 

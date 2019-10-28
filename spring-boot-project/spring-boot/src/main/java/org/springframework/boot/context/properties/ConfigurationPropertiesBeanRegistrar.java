@@ -39,8 +39,8 @@ class ConfigurationPropertiesBeanRegistrar implements ImportBeanDefinitionRegist
 	@Override
 	public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
 		ConfigurableListableBeanFactory beanFactory = (ConfigurableListableBeanFactory) registry;
-		getTypes(metadata).forEach(
-				(type) -> ConfigurationPropertiesBeanDefinitionRegistrar.register(registry, beanFactory, type));
+		getTypes(metadata) // <1>
+				.forEach((type) -> ConfigurationPropertiesBeanDefinitionRegistrar.register(registry, beanFactory, type)); // <2>
 	}
 
 	private List<Class<?>> getTypes(AnnotationMetadata metadata) {

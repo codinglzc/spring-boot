@@ -67,8 +67,14 @@ public class LogFile {
 	 */
 	public static final String FILE_PATH_PROPERTY = "logging.file.path";
 
+	/**
+	 * 文件名
+	 */
 	private final String file;
 
+	/**
+	 * 文件路径
+	 */
 	private final String path;
 
 	/**
@@ -128,8 +134,10 @@ public class LogFile {
 	 * suitable properties
 	 */
 	public static LogFile get(PropertyResolver propertyResolver) {
+		// <1> 获得 file 和 path 属性
 		String file = getLogFileProperty(propertyResolver, FILE_NAME_PROPERTY, FILE_PROPERTY);
 		String path = getLogFileProperty(propertyResolver, FILE_PATH_PROPERTY, PATH_PROPERTY);
+		// <2> 创建 LogFile 对象
 		if (StringUtils.hasLength(file) || StringUtils.hasLength(path)) {
 			return new LogFile(file, path);
 		}
